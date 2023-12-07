@@ -156,7 +156,7 @@ fn part2(input: &str) -> usize {
     let g = parse_grid(input);
 
     for (i, row) in g.grid.iter().enumerate() {
-        for (j, col) in row.iter().enumerate() {
+        for (j, _) in row.iter().enumerate() {
             if is_star(g.grid[i][j]) == true {
                 sum += find_gear_ratio(&g, i, j);
             }
