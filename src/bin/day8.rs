@@ -23,6 +23,31 @@ fn l_mod(x: u32, len: u32) -> usize {
     return (x % len) as usize;
 }
 
+fn gcd(first: usize, second: usize) -> usize {
+    if second == 0 {
+        return first;
+    } else {
+        return gcd(second, first % second);
+    }
+}
+
+fn lcm(first: usize, second: usize) -> usize {
+    first * second / gcd(first, second)
+}
+
+fn lcm_list(input: &[usize]) -> usize {
+    let mut iter = input.iter();
+    let first = iter.next().unwrap();
+    let second = iter.next().unwrap();
+
+    let mut ans = lcm(*first, *second);
+    while let Some(next) = iter.next() {
+        ans = lcm(ans, *next);
+    }
+
+    return ans;
+}
+
 fn part1(input: &str) -> u32 {
     let mut steps = 0;
     let directions: Vec<char> = input.lines().nth(0).unwrap().chars().collect();
@@ -71,7 +96,6 @@ fn part1(input: &str) -> u32 {
 }
 
 fn part2(input: &str) -> usize {
-    let mut steps = 0;
     let directions: Vec<char> = input.lines().nth(0).unwrap().chars().collect();
 
     let mut map = HashMap::new();
@@ -87,54 +111,37 @@ fn part2(input: &str) -> usize {
         });
     }
 
-    let mut found = false;
-    while !found {
-        let mut next = Vec::new();
-        let dir = directions[l_mod(steps, directions.len() as u32)];
+    let mut answer = Vec::new();
 
-        println!("Looking at vecs {node:?} at step {steps}");
+    for entry in node {
+        let mut current = entry;
+        let mut c = 0;
 
-        match dir {
-            'L' => {
-                for route in &node {
-                    next.push(map.get(route).unwrap().0)
+        while !current.ends_with("Z") {
+            let dir = directions[l_mod(c, directions.len() as u32)];
+
+            match dir {
+                'L' => {
+                    current = map.get(current).unwrap().0;
                 }
-
-                let ends = next.iter().all(|word| word.ends_with("Z"));
-                if ends {
-                    found = true;
-                    break;
+                'R' => {
+                    current = map.get(current).unwrap().1;
                 }
-
-                node.clear();
-                node = next;
+                _ => {
+                    panic!("Direction is not recognized");
+                }
             }
-            'R' => {
-                for route in &node {
-                    next.push(map.get(route).unwrap().1)
-                }
-
-                let ends = next.iter().all(|word| word.ends_with("Z"));
-                if ends {
-                    found = true;
-                    break;
-                }
-
-                node.clear();
-                node = next;
-            }
-            _ => {
-                panic!("Direction is not recognized");
-            }
+            c += 1;
         }
-        steps += 1;
+
+        answer.push(c as usize);
     }
 
-    (steps + 1) as usize
+    return lcm_list(&answer);
 }
 
 fn main() {
-    //println!("PART - 1: {}", part1(INPUT));
+    println!("PART - 1: {}", part1(INPUT));
     println!("PART - 2: {}", part2(INPUT));
 }
 
